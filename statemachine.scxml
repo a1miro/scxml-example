@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" initial="idle">
+  <state id="idle">
+    <transition event="start" target="active"/>
+  </state>
+  <state id="active">
+    <onentry>
+      <send event="activated"/>
+    </onentry>
+    <transition event="stop" target="idle"/>
+    <transition event="update" target="active">
+      <param name="value"/>
+      <script>_model.setValue(_event.data.value);</script>
+    </transition>
+  </state>
+</scxml>
