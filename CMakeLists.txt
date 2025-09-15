@@ -9,23 +9,26 @@ find_package(Qt6 REQUIRED COMPONENTS Core Quick Qml Scxml)
 
 qt_add_statecharts(SCXML_FILES statemachine.scxml)
 
-add_executable(SCXMLExample
+add_executable(scxmlexample_app
     main.cpp
     MyModel.cpp
     Statemachine.cpp
     ${SCXML_FILES}
 )
 
-target_include_directories(SCXMLExample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(SCXMLExample PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Scxml)
+target_include_directories(scxmlexample_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(scxmlexample_app PRIVATE ${CMAKE_BINARY_DIR})
+target_link_libraries(scxmlexample_app PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Scxml)
 
-qt_add_qml_module(SCXMLExample
+qt_add_qml_module(scxmlexample_app
     URI SCXMLExample
     QML_FILES
         qml/Main.qml
 )
 
-install(TARGETS SCXMLExample
+set_target_properties(scxmlexample_app PROPERTIES OUTPUT_NAME SCXMLExampleApp)
+
+install(TARGETS scxmlexample_app
     BUNDLE DESTINATION .
     RUNTIME DESTINATION bin
 )

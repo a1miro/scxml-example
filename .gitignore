@@ -1,0 +1,51 @@
+# Build and generated files
+build/
+*.user
+*.autosave
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.app
+*.a
+*.lib
+*.moc
+*.rcc
+*.qrc
+*.qmlc
+*.jsc
+*.pyc
+*.pyo
+*.pyd
+*.DS_Store
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+# Meta types and QML cache
+meta_types/
+qmltypes/
+.rcc/
+.qt/
+# VSCode
+.vscode/
+# MacOS
+.DS_Store
+# Windows
+Thumbs.db
+# Other
+*.old
+*.orig
+*.rej

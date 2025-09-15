@@ -5,10 +5,7 @@ Statemachine::Statemachine(MyModel *model, QObject *parent)
     : QObject(parent), m_model(model)
 {
     m_scxml.setParent(this);
-    m_scxml.setDataModel(model);
-    connect(&m_scxml, &StatemachineScxml::activated, this, [this]() {
-        // Forward to QML if needed
-    });
+    // Datamodel sync removed: model is source of truth; SCXML variable 'value' is updated via event script.
 }
 
 void Statemachine::start() {
@@ -24,6 +21,8 @@ void Statemachine::sendStop() {
 }
 
 void Statemachine::sendUpdate(int value) {
+    // Update model immediately (UI responsiveness) and submit event carrying value
+    m_model->setValue(value);
     QVariantMap params;
     params["value"] = value;
     m_scxml.submitEvent("update", params);
