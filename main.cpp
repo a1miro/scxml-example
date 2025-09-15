@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     statemachine.start();
 
-    engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/SCXMLExample/qml/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
     return app.exec();
