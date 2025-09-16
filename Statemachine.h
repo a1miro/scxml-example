@@ -11,6 +11,8 @@ public:
     Q_INVOKABLE void sendStart();
     Q_INVOKABLE void sendStop();
     Q_INVOKABLE void sendUpdate(int value);
+signals:
+    void activated();
 private:
     statemachine m_scxml;
     MyModel *m_model;

@@ -5,7 +5,11 @@ Statemachine::Statemachine(MyModel *model, QObject *parent)
     : QObject(parent), m_model(model)
 {
     m_scxml.setParent(this);
-    // Datamodel sync removed: model is source of truth; SCXML variable 'value' is updated via event script.
+    // Listen for the 'activated' event and emit activated signal
+    m_scxml.connectToEvent("activated", [this](const QScxmlEvent &event) {
+        Q_UNUSED(event);
+        emit activated();
+    });
 }
 
 void Statemachine::start() {
