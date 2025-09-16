@@ -4,6 +4,9 @@
     <data id="value" expr="0"/>
   </datamodel>
   <state id="idle">
+    <onentry>
+      <send event="idled"/>
+    </onentry>
     <transition event="start" target="active"/>
   </state>
   <state id="active">

@@ -54,7 +54,11 @@ ApplicationWindow {
     Connections {
         target: statemachine
         function onActivated() {
-            statusText = "Activated event received at " + Qt.formatTime(new Date(), "hh:mm:ss")
+            statusText = "Current state: Active : " + Qt.formatTime(new Date(), "hh:mm:ss")
+        }
+
+        function onIdled() {
+            statusText = "Current state: Idle : " + Qt.formatTime(new Date(), "hh:mm:ss")
         }
     }
 }

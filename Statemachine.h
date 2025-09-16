@@ -13,6 +13,7 @@ public:
     Q_INVOKABLE void sendUpdate(int value);
 signals:
     void activated();
+    void idled();
 private:
     statemachine m_scxml;
     MyModel *m_model;

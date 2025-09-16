@@ -10,6 +10,12 @@ Statemachine::Statemachine(MyModel *model, QObject *parent)
         Q_UNUSED(event);
         emit activated();
     });
+
+    m_scxml.connectToEvent("idled", [this](const QScxmlEvent &event) {
+        Q_UNUSED(event);
+        emit idled();
+    });
+
 }
 
 void Statemachine::start() {
