@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "MyModel.h"
-#include "Statemachine.h"
+#include "smwrapper.h"
 
 int main(int argc, char *argv[])
 {

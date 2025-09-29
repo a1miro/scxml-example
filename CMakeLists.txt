@@ -31,7 +31,7 @@ qt_add_statecharts(SCXML_FILES statemachine.scxml)
 add_executable(scxmlexample_app
     main.cpp
     MyModel.cpp
-    Statemachine.cpp
+    smwrapper.cpp
     ${SCXML_FILES}
 )
 

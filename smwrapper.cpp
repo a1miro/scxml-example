@@ -1,4 +1,4 @@
-#include "Statemachine.h"
+#include "smwrapper.h"
 #include "MyModel.h"
 
 Statemachine::Statemachine(MyModel *model, QObject *parent)
