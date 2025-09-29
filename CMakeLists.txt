@@ -20,6 +20,9 @@ install(CODE [[
 cmake_minimum_required(VERSION 3.16)
 project(SCXMLExample LANGUAGES CXX)
 
+# Use custom cmake modules to override Qt6's FindWrapOpenGL
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
