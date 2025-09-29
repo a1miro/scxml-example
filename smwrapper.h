@@ -8,13 +8,77 @@ class Statemachine : public QObject {
 public:
     explicit Statemachine(MyModel *model, QObject *parent = nullptr);
     void start();
-    Q_INVOKABLE void sendStart();
-    Q_INVOKABLE void sendStop();
+    
+    // Connection Management
+    Q_INVOKABLE void connectToNetwork();
+    Q_INVOKABLE void disconnectFromNetwork();
+    Q_INVOKABLE void simulateConnectionSuccess();
+    Q_INVOKABLE void simulateConnectionFailure();
+    Q_INVOKABLE void simulateConnectionLost();
+    Q_INVOKABLE void retryConnection();
+    
+    // Data Processing
+    Q_INVOKABLE void startProcessing();
+    Q_INVOKABLE void stopProcessing();
     Q_INVOKABLE void sendUpdate(int value);
+    Q_INVOKABLE void simulateDataBatch();
+    Q_INVOKABLE void simulateProcessingError();
+    Q_INVOKABLE void completeDataProcessing();
+    Q_INVOKABLE void resetProcessing();
+    
+    // User Interaction
+    Q_INVOKABLE void simulateUserInteraction();
+    Q_INVOKABLE void simulateUserLogin();
+    Q_INVOKABLE void simulateUserLogout();
+    Q_INVOKABLE void simulateUserAction();
+    Q_INVOKABLE void simulateUserIdle();
+    Q_INVOKABLE void simulateSessionTimeout();
+    
+    // System Monitoring
+    Q_INVOKABLE void reportSystemHealthy();
+    Q_INVOKABLE void reportSystemWarning();
+    Q_INVOKABLE void reportSystemCritical();
+    Q_INVOKABLE void acknowledgeWarning();
+    Q_INVOKABLE void initiateSystemRecovery();
+    Q_INVOKABLE void shutdownSystem();
+    Q_INVOKABLE void restartSystem();
+
 signals:
+    // Legacy signals (kept for compatibility)
     void activated();
     void idled();
+    
+    // Connection status signals
+    void connectionStatusChanged();
+    void connectionAttempting();
+    void connectionEstablished();
+    void connectionReconnecting();
+    void connectionError();
+    void connectionOffline();
+    
+    // Data processing signals
+    void processingIdle();
+    void processingStarted();
+    void dataProcessed();
+    void processingCompleting();
+    void processingError();
+    
+    // User interface signals
+    void uiWaiting();
+    void uiActive();
+    void uiAuthenticated();
+    void userActionProcessed();
+    void userAuthenticatedAction();
+    
+    // System monitoring signals
+    void monitorStarted();
+    void healthCheckPassed();
+    void systemWarningActive();
+    void systemCriticalError();
+    void systemShuttingDown();
+
 private:
     statemachine m_scxml;
     MyModel *m_model;
+    void connectAllEvents();
 };

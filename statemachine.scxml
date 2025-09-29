@@ -1,21 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scxml xmlns="http://www.w3.org/2005/07/scxml" initial="idle" version="1.0">
+<scxml xmlns="http://www.w3.org/2005/07/scxml" initial="system" version="1.0">
   <datamodel>
     <data id="value" expr="0"/>
+    <data id="connectionAttempts" expr="0"/>
+    <data id="processedItems" expr="0"/>
+    <data id="errorCount" expr="0"/>
+    <data id="isUserActive" expr="false"/>
   </datamodel>
-  <state id="idle">
-    <onentry>
-      <send event="idled"/>
-    </onentry>
-    <transition event="start" target="active"/>
-  </state>
-  <state id="active">
-    <onentry>
-      <send event="activated"/>
-    </onentry>
-    <transition event="stop" target="idle"/>
-    <transition event="update" target="active">
-      <script>value = _event.data.value;</script>
-    </transition>
-  </state>
+  
+  <!-- Main parallel state containing all concurrent processes -->
+  <parallel id="system">
+    
+    <!-- Connection Management - handles network/device connectivity -->
+    <state id="connectionState" initial="disconnected">
+      <state id="disconnected">
+        <onentry>
+          <assign location="connectionAttempts" expr="0"/>
+          <send event="connection.status.changed" delay="100ms"/>
+        </onentry>
+        <transition event="connect" target="connecting"/>
+        <transition event="system.shutdown" target="offline"/>
+      </state>
+      
+      <state id="connecting">
+        <onentry>
+          <assign location="connectionAttempts" expr="connectionAttempts + 1"/>
+          <send event="connection.attempting" delay="100ms"/>
+        </onentry>
+        <transition event="connection.success" target="connected"/>
+        <transition event="connection.failed" target="disconnected" cond="connectionAttempts &lt; 3"/>
+        <transition event="connection.failed" target="connection_error" cond="connectionAttempts >= 3"/>
+        <transition event="disconnect" target="disconnected"/>
+      </state>
+      
+      <state id="connected">
+        <onentry>
+          <assign location="connectionAttempts" expr="0"/>
+          <send event="connection.established" delay="100ms"/>
+        </onentry>
+        <transition event="disconnect" target="disconnected"/>
+        <transition event="connection.lost" target="reconnecting"/>
+      </state>
+      
+      <state id="reconnecting">
+        <onentry>
+          <send event="connection.reconnecting" delay="100ms"/>
+        </onentry>
+        <transition event="connection.success" target="connected"/>
+        <transition event="connection.failed" target="disconnected"/>
+        <transition event="disconnect" target="disconnected"/>
+      </state>
+      
+      <state id="connection_error">
+        <onentry>
+          <send event="connection.error" delay="100ms"/>
+        </onentry>
+        <transition event="retry.connection" target="disconnected"/>
+        <transition event="system.shutdown" target="offline"/>
+      </state>
+      
+      <state id="offline">
+        <onentry>
+          <send event="connection.offline" delay="100ms"/>
+        </onentry>
+        <transition event="system.restart" target="disconnected"/>
+      </state>
+    </state>
+    
+    <!-- Data Processing - handles background data operations -->
+    <state id="dataProcessing" initial="idle">
+      <state id="idle">
+        <onentry>
+          <send event="processing.idle" delay="100ms"/>
+        </onentry>
+        <transition event="start.processing" target="active"/>
+        <transition event="data.batch.received" target="active"/>
+      </state>
+      
+      <state id="active">
+        <onentry>
+          <send event="processing.started" delay="100ms"/>
+        </onentry>
+        <transition event="stop.processing" target="idle"/>
+        <transition event="update" target="active">
+          <assign location="value" expr="_event.data.value"/>
+          <assign location="processedItems" expr="processedItems + 1"/>
+          <send event="data.processed" delay="100ms"/>
+        </transition>
+        <transition event="process.error" target="error"/>
+        <transition event="data.complete" target="completing"/>
+      </state>
+      
+      <state id="completing">
+        <onentry>
+          <send event="processing.completing" delay="100ms"/>
+        </onentry>
+        <transition event="completion.done" target="idle"/>
+        <transition event="process.error" target="error"/>
+      </state>
+      
+      <state id="error">
+        <onentry>
+          <assign location="errorCount" expr="errorCount + 1"/>
+          <send event="processing.error" delay="100ms"/>
+        </onentry>
+        <transition event="retry.processing" target="active"/>
+        <transition event="reset.processing" target="idle">
+          <assign location="errorCount" expr="0"/>
+        </transition>
+      </state>
+    </state>
+    
+    <!-- User Interaction - handles UI states and user engagement -->
+    <state id="userInterface" initial="ui_waiting">
+      <state id="ui_waiting">
+        <onentry>
+          <assign location="isUserActive" expr="false"/>
+          <send event="ui.waiting" delay="100ms"/>
+        </onentry>
+        <transition event="user.interaction" target="ui_active"/>
+        <transition event="user.login" target="authenticated"/>
+      </state>
+      
+      <state id="ui_active">
+        <onentry>
+          <assign location="isUserActive" expr="true"/>
+          <send event="ui.active" delay="100ms"/>
+        </onentry>
+        <transition event="user.idle" target="ui_waiting">
+          <send event="idle.timer.started" delay="5s"/>
+        </transition>
+        <transition event="user.logout" target="ui_waiting"/>
+        <transition event="user.action" target="ui_active">
+          <send event="user.action.processed" delay="100ms"/>
+        </transition>
+        <transition event="user.login" target="authenticated"/>
+      </state>
+      
+      <state id="authenticated">
+        <onentry>
+          <assign location="isUserActive" expr="true"/>
+          <send event="ui.authenticated" delay="100ms"/>
+        </onentry>
+        <transition event="user.logout" target="ui_waiting"/>
+        <transition event="user.action" target="authenticated">
+          <send event="user.authenticated.action" delay="100ms"/>
+        </transition>
+        <transition event="session.timeout" target="ui_waiting"/>
+        <transition event="user.idle" target="authenticated">
+          <send event="idle.timer.auth.started" delay="10s"/>
+        </transition>
+      </state>
+    </state>
+    
+    <!-- System Monitor - watches overall system health -->
+    <state id="systemMonitor" initial="monitoring">
+      <state id="monitoring">
+        <onentry>
+          <send event="monitor.started" delay="100ms"/>
+        </onentry>
+        <transition event="system.healthy" target="monitoring">
+          <send event="health.check.passed" delay="100ms"/>
+        </transition>
+        <transition event="system.warning" target="warning"/>
+        <transition event="system.critical" target="critical"/>
+      </state>
+      
+      <state id="warning">
+        <onentry>
+          <send event="system.warning.active" delay="100ms"/>
+        </onentry>
+        <transition event="system.healthy" target="monitoring"/>
+        <transition event="system.critical" target="critical"/>
+        <transition event="warning.acknowledged" target="monitoring"/>
+      </state>
+      
+      <state id="critical">
+        <onentry>
+          <send event="system.critical.error" delay="100ms"/>
+        </onentry>
+        <transition event="system.recovery" target="monitoring"/>
+        <transition event="system.shutdown" target="shutdown"/>
+      </state>
+      
+      <state id="shutdown">
+        <onentry>
+          <send event="system.shutting.down" delay="100ms"/>
+        </onentry>
+        <transition event="system.restart" target="monitoring"/>
+      </state>
+    </state>
+    
+  </parallel>
 </scxml>
